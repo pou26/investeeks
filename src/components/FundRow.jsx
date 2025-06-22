@@ -2,29 +2,28 @@ import React, { useState } from 'react';
 import { TrendingUp, Award, ChevronDown, ChevronUp, BarChart3, Shield, Target, Calendar, TrendingDown, Info, Move } from 'lucide-react';
 import { mockFundsData } from '../utils/mockData';
 
-const FundRow = ({ fund, index ,onDragStart }) => {
-    if (!fund) return null;
+// FundRow Component
+const FundRow = ({ fund, index, onDragStart }) => {
+  if (!fund) return null;
 
-
-
-const fundDetails = {
-  nav: "₹ 410.42",
-  fiveYearCagr: "34.338%",
-  navDate: "Jun 19",
-  category: "Equity • Contra",
-  fundSize: "₹ 45,495 Cr",
-  downsideProtection: "Category Leader",
-  fundSizeRank: "Category Leader",
-  analysis: [
-    "The fund has been a Category Leader on the Downside Protection Measure metric",
-    "The fund has been a Category Leader on the Fund Size metric"
-  ],
-  recommendedFunds: [
-    { name: "BHARAT Bond FOF - April 2031 Direct (G)", cagr: "9.4%", period: "3Y CAGR" },
-    { name: "Parag Parikh Flexi Cap Fund Direct (G)", cagr: "25.9%", period: "3Y CAGR" },
-    { name: "BHARAT Bond ETF FOF - April 2032", cagr: "9.5%", period: "3Y CAGR" }
-  ]
-};
+  const fundDetails = {
+    nav: "₹ 410.42",
+    fiveYearCagr: "34.338%",
+    navDate: "Jun 19",
+    category: "Equity • Contra",
+    fundSize: "₹ 45,495 Cr",
+    downsideProtection: "Category Leader",
+    fundSizeRank: "Category Leader",
+    analysis: [
+      "The fund has been a Category Leader on the Downside Protection Measure metric",
+      "The fund has been a Category Leader on the Fund Size metric"
+    ],
+    recommendedFunds: [
+      { name: "BHARAT Bond FOF - April 2031 Direct (G)", cagr: "9.4%", period: "3Y CAGR" },
+      { name: "Parag Parikh Flexi Cap Fund Direct (G)", cagr: "25.9%", period: "3Y CAGR" },
+      { name: "BHARAT Bond ETF FOF - April 2032", cagr: "9.5%", period: "3Y CAGR" }
+    ]
+  };
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -50,18 +49,20 @@ const fundDetails = {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-
-    const handleDragStart = (e) => {
+  const handleDragStart = (e) => {
     setIsDragging(true);
+    // Use dataTransfer instead of localStorage
+    e.dataTransfer.setData('application/json', JSON.stringify(fund));
+    e.dataTransfer.effectAllowed = 'copy';
+    
     if (onDragStart) {
-      onDragStart(fund); //parent drag handler
+      onDragStart(fund);
     }
   };
 
   const handleDragEnd = () => {
     setIsDragging(false);
   };
-
 
   return (
     <div className={`border-b border-gray-100 transition-all duration-200 ${isDragging ? 'opacity-50 scale-95' : ''}`}>

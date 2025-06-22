@@ -1,32 +1,36 @@
+
 import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Tooltip } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { X, TrendingUp, Award, ArrowUpDown, ChevronDown, ChevronUp, BarChart3, Shield, Target, Calendar, TrendingDown, Info, Move } from 'lucide-react';
+import { mockFundsData } from '../utils/mockData';
 
 // FundComparisonCard Component
 const FundComparisonCard = ({ comparedFunds, setComparedFunds }) => {
   const [isVisible, setIsVisible] = useState(false);
-    if (!Array.isArray(comparedFunds)) return null;
+  
+  if (!Array.isArray(comparedFunds)) return null;
 
   const handleDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
   };
 
-const handleDrop = (e, slotIndex) => {
-  e.preventDefault();
-  try {
-    const fundData = JSON.parse(localStorage.getItem('draggedFund'));
-    if (fundData) {
-      const newComparedFunds = [...comparedFunds];
-      newComparedFunds[slotIndex] = fundData;
-      setComparedFunds(newComparedFunds);
-      setIsVisible(true);
+  const handleDrop = (e, slotIndex) => {
+    e.preventDefault();
+    try {
+      // Get fund data from dataTransfer instead of localStorage
+      const fundDataString = e.dataTransfer.getData('application/json');
+      if (fundDataString) {
+        const fundData = JSON.parse(fundDataString);
+        const newComparedFunds = [...comparedFunds];
+        newComparedFunds[slotIndex] = fundData;
+        setComparedFunds(newComparedFunds);
+        setIsVisible(true);
+      }
+    } catch (error) {
+      console.error('Error parsing dropped fund data:', error);
     }
-  } catch (error) {
-    console.error('Error parsing dropped fund data:', error);
-  }
-};
-
+  };
 
   const removeFund = (index) => {
     const newComparedFunds = [...comparedFunds];
