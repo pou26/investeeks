@@ -1,29 +1,57 @@
 import React, { useState } from 'react';
 import { TrendingUp, Award, ChevronDown, ChevronUp, BarChart3, Shield, Target, Calendar, TrendingDown, Info, Move } from 'lucide-react';
-import { mockFundsData } from '../utils/mockData';
+import { mockFundsData, mockFundsDetailData } from '../utils/mockData';
 
 // FundRow Component
 const FundRow = ({ fund, index, onDragStart }) => {
   if (!fund) return null;
 
-  const fundDetails = {
+  // Get detailed data for the current fund
+  const fundDetails = mockFundsDetailData.find(detail => detail.id === fund.id) || {};
+
+  // Fallback data if detailed data is not found
+  const defaultDetails = {
     nav: "₹ 410.42",
-    fiveYearCagr: "34.338%",
     navDate: "Jun 19",
-    category: "Equity • Contra",
-    fundSize: "₹ 45,495 Cr",
-    downsideProtection: "Category Leader",
-    fundSizeRank: "Category Leader",
-    analysis: [
-      "The fund has been a Category Leader on the Downside Protection Measure metric",
-      "The fund has been a Category Leader on the Fund Size metric"
-    ],
-    recommendedFunds: [
-      { name: "BHARAT Bond FOF - April 2031 Direct (G)", cagr: "9.4%", period: "3Y CAGR" },
-      { name: "Parag Parikh Flexi Cap Fund Direct (G)", cagr: "25.9%", period: "3Y CAGR" },
-      { name: "BHARAT Bond ETF FOF - April 2032", cagr: "9.5%", period: "3Y CAGR" }
-    ]
+    threeYearCAGR: fund.threeYearReturn || "N/A",
+    expenseRatio: "N/A",
+    fundManager: "N/A",
+    fundType: "Direct Fund",
+    details: {
+      consistencyRating: "Good",
+      fundSizeRating: "Good",
+      description: `These are the ${fund.opinion.toLowerCase()} funds within ${fund.category.toLowerCase()} mutual funds.`,
+      analysis: [
+        {
+          metric: "Performance",
+          rating: "Good",
+          description: `The fund has shown ${fund.opinion.toLowerCase()} performance in its category`
+        },
+        {
+          metric: "Fund Size",
+          rating: "Good",
+          description: `The fund maintains good fund size with AUM of ${fund.aum}`
+        }
+      ]
+    }
   };
+
+  // Merge fund details with defaults
+  const finalDetails = {
+    ...defaultDetails,
+    ...fundDetails,
+    details: {
+      ...defaultDetails.details,
+      ...(fundDetails.details || {})
+    }
+  };
+
+  // Mock recommended funds (you can make this dynamic too if needed)
+  const recommendedFunds = [
+    { name: "BHARAT Bond FOF - April 2031 Direct (G)", cagr: "9.4%", period: "3Y CAGR" },
+    { name: "Parag Parikh Flexi Cap Fund Direct (G)", cagr: "25.9%", period: "3Y CAGR" },
+    { name: "BHARAT Bond ETF FOF - April 2032", cagr: "9.5%", period: "3Y CAGR" }
+  ];
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -45,13 +73,21 @@ const FundRow = ({ fund, index, onDragStart }) => {
     }
   };
 
+  const getRatingColor = (rating) => {
+    switch (rating) {
+      case 'Category Leader': return 'w-5/6';
+      case 'Good': return 'w-4/6';
+      case 'Average': return 'w-3/6';
+      default: return 'w-2/6';
+    }
+  };
+
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
   const handleDragStart = (e) => {
     setIsDragging(true);
-    // Use dataTransfer instead of localStorage
     e.dataTransfer.setData('application/json', JSON.stringify(fund));
     e.dataTransfer.effectAllowed = 'copy';
     
@@ -127,7 +163,7 @@ const FundRow = ({ fund, index, onDragStart }) => {
         </div>
       </div>
 
-      {/* Dropdown Content */}
+      {/* Dynamic Dropdown Content */}
       {isDropdownOpen && (
         <div className="bg-white border-t border-gray-200 p-6 animate-in slide-in-from-top-2 duration-200">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -137,20 +173,24 @@ const FundRow = ({ fund, index, onDragStart }) => {
                 <h3 className="text-lg font-semibold text-gray-900">{fund.name}</h3>
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
-                    <div className="text-sm text-gray-500">NAV ({fundDetails.navDate})</div>
-                    <div className="text-lg font-semibold text-gray-900">{fundDetails.nav}</div>
+                    <div className="text-sm text-gray-500">NAV ({finalDetails.navDate})</div>
+                    <div className="text-lg font-semibold text-gray-900">{finalDetails.nav}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-gray-500">5 Year CAGR</div>
-                    <div className="text-lg font-semibold text-green-600">{fundDetails.fiveYearCagr}</div>
+                    <div className="text-sm text-gray-500">3 Year CAGR</div>
+                    <div className="text-lg font-semibold text-green-600">{finalDetails.threeYearCAGR}</div>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center space-x-2 mb-6">
-                <span className="text-sm text-gray-600">{fundDetails.category}</span>
-                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
-                  Top Ranked
+                <span className="text-sm text-gray-600">{fund.category} • {fund.company}</span>
+                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                  fund.opinion === 'Top Ranked' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-orange-100 text-orange-800'
+                }`}>
+                  {fund.opinion}
                 </span>
                 <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium flex items-center space-x-1">
                   <Move className="w-3 h-3" />
@@ -158,53 +198,65 @@ const FundRow = ({ fund, index, onDragStart }) => {
                 </span>
               </div>
 
+              {/* Fund Manager and Details */}
+              <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+                <div>
+                  <span className="text-gray-500">Fund Manager:</span>
+                  <span className="ml-2 text-gray-900">{finalDetails.fundManager}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Expense Ratio:</span>
+                  <span className="ml-2 text-gray-900">{finalDetails.expenseRatio}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Fund Type:</span>
+                  <span className="ml-2 text-gray-900">{finalDetails.fundType}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">AUM:</span>
+                  <span className="ml-2 text-gray-900">{fund.aum}</span>
+                </div>
+              </div>
+
               {/* Analysis Section */}
               <div className="mb-6">
                 <div className="flex items-center space-x-2 mb-3">
-                  <TrendingUp className="w-5 h-5 text-emerald-600" />
-                  <h4 className="font-medium text-gray-900">Top Ranked</h4>
+                  {getOpinionIcon(fund.opinion)}
+                  <h4 className="font-medium text-gray-900">{fund.opinion}</h4>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">
-                  These are the top-ranked funds within contra mutual funds.
+                  {finalDetails.details.description}
                 </p>
                 <div className="text-sm text-gray-700 mb-4">
                   Our analysis of this fund
                 </div>
               </div>
 
-              {/* Performance Metrics */}
+              {/* Performance Metrics - Dynamic */}
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Shield className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm font-medium text-gray-700">Downside Protection Measure</span>
+                {finalDetails.details.analysis && finalDetails.details.analysis.map((analysis, idx) => (
+                  <div key={idx} className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex items-center space-x-2 mb-2">
+                      {idx === 0 ? (
+                        <Shield className="w-4 h-4 text-blue-600" />
+                      ) : (
+                        <BarChart3 className="w-4 h-4 text-blue-600" />
+                      )}
+                      <span className="text-sm font-medium text-gray-700">{analysis.metric}</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mb-2">{analysis.rating}</div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className={`bg-emerald-500 h-2 rounded-full ${getRatingColor(analysis.rating)}`}></div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">
+                      {analysis.description}
+                    </p>
                   </div>
-                  <div className="text-xs text-gray-500 mb-2">Category Leader</div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-emerald-500 h-2 rounded-full w-4/5"></div>
-                  </div>
-                  <p className="text-xs text-gray-600 mt-2">
-                    {fundDetails.analysis[0]}
-                  </p>
-                </div>
-
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <BarChart3 className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm font-medium text-gray-700">Fund Size</span>
-                  </div>
-                  <div className="text-xs text-gray-500 mb-2">Category Leader</div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-emerald-500 h-2 rounded-full w-4/5"></div>
-                  </div>
-                  <p className="text-xs text-gray-600 mt-2">
-                    {fundDetails.analysis[1]}
-                  </p>
-                </div>
+                ))}
               </div>
 
               <button className="text-blue-600 text-sm hover:underline flex items-center space-x-1">
-                <span>View all 7 analysis</span>
+                <span>View all analysis</span>
                 <ChevronDown className="w-4 h-4" />
               </button>
             </div>
@@ -229,20 +281,20 @@ const FundRow = ({ fund, index, onDragStart }) => {
               {/* Recommended Funds */}
               <div>
                 <div className="flex items-center space-x-2 mb-4">
-                  <span className="text-sm font-medium text-gray-900">Scripbox Recommended Equity Funds</span>
+                  <span className="text-sm font-medium text-gray-900">Scripbox Recommended {fund.category} Funds</span>
                   <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded font-medium">
                     Recommended
                   </span>
                 </div>
                 <p className="text-xs text-gray-600 mb-4">
-                  Want the equity funds that are right for your long term equity investment needs?
+                  Want the {fund.category.toLowerCase()} funds that are right for your investment needs?
                 </p>
                 <button className="text-blue-600 text-xs hover:underline mb-4">
                   Learn more
                 </button>
 
                 <div className="space-y-3">
-                  {fundDetails.recommendedFunds.map((recFund, idx) => (
+                  {recommendedFunds.map((recFund, idx) => (
                     <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">

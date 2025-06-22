@@ -13,19 +13,14 @@ const FundComparisonWrapper = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="flex gap-6 min-h-screen">
       {/* Comparison Card */}
       <FundComparisonCard
         comparedFunds={comparedFunds}
         setComparedFunds={setComparedFunds}
       />
       
-      {/* Fund List */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
 
-        
-
-      </div>
     </div>
   );
 };
