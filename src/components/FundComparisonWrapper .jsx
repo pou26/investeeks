@@ -6,13 +6,12 @@ const FundComparisonWrapper = () => {
   const [comparedFunds, setComparedFunds] = useState([null, null]);
 
   const handleDragStart = (fund) => {
-    // Storing the fund as text so drop zones can read it
+    // Store the fund as text so drop zones can read it
     localStorage.setItem('draggedFund', JSON.stringify(fund));
   };
 
   return (
-    <div className="grid grid-cols-1 gap-6 p-6 w-full">
-
+    <div className="grid grid-cols-1  gap-6 p-6">
       {/* Left: Fund List */}
       <div>
         <FundRow onDragStart={handleDragStart} />
