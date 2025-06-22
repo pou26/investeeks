@@ -1,12 +1,12 @@
-//Main Component
 import React, { useState, useEffect } from 'react';
-import { mockFundsData } from '../utils/mockData';
 import Header from './Header';
 import Breadcrumb from './Breadcrumb';
 import PageHeader from './PageHeader';
 import FiltersSidebar from './FiltersSidebar';
 import MainContent from './MainContent';
-import FundComparisonCard from './FundComparisonCard';
+import { mockFundsData } from '../utils/mockData';
+import FloatingComparisonPanel from './Improved'; // Import it from Improved.jsx
+import ImprovedFundComparison from './Improved';
 
 const ScripboxLanding = () => {
   const [funds, setFunds] = useState([]);
@@ -16,36 +16,34 @@ const ScripboxLanding = () => {
     category: 'All',
     fundType: 'Direct Funds'
   });
+
   const [currentPage, setCurrentPage] = useState(1);
   const fundsPerPage = 10;
-  
 
-useEffect(() => {
+  // Floating comparison state
+  const [comparedFunds, setComparedFunds] = useState([null, null]);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
-  setFunds(mockFundsData);
-  setFilteredFunds(mockFundsData);
-}, []);
+  useEffect(() => {
+    setFunds(mockFundsData);
+    setFilteredFunds(mockFundsData);
+  }, []);
 
   useEffect(() => {
     let filtered = funds;
-
     if (filters.opinion !== 'All') {
       filtered = filtered.filter(fund => fund.opinion === filters.opinion);
     }
-
     if (filters.category !== 'All') {
       filtered = filtered.filter(fund => fund.category === filters.category);
     }
-
     setFilteredFunds(filtered);
     setCurrentPage(1);
   }, [filters, funds]);
 
   const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterType]: value
-    }));
+    setFilters(prev => ({ ...prev, [filterType]: value }));
   };
 
   const handlePageChange = (page) => {
@@ -69,19 +67,20 @@ useEffect(() => {
             filters={filters} 
             onFilterChange={handleFilterChange} 
           />
-          
-          <MainContent
-            filteredFunds={filteredFunds}
-            currentFunds={currentFunds}
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            currentPage={currentPage}
-            fundsPerPage={fundsPerPage}
-            onPageChange={handlePageChange}
-          />
-          <FundComparisonCard/>
+          <ImprovedFundComparison/>
+
         </div>
+        
       </div>
+
+      <FloatingComparisonPanel
+        comparedFunds={comparedFunds}
+        setComparedFunds={setComparedFunds}
+        isMinimized={isMinimized}
+        setIsMinimized={setIsMinimized}
+        isVisible={isVisible}
+        setIsVisible={setIsVisible}
+      />
     </div>
   );
 };

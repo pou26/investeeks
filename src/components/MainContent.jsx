@@ -27,7 +27,7 @@ const MainContent = ({
         onFilterChange={onFilterChange}
       />
 
-      <FundTable funds={currentFunds} />
+      <FundTable funds={currentFunds} enableDropdown={true} />
 
       <Pagination
         currentPage={currentPage}

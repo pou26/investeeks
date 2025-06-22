@@ -86,21 +86,26 @@ const FundRow = ({ fund, index, onDragStart }) => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleDragStart = (e) => {
-    setIsDragging(true);
-    e.dataTransfer.setData('application/json', JSON.stringify(fund));
-    e.dataTransfer.effectAllowed = 'copy';
-    
-    if (onDragStart) {
-      onDragStart(fund);
-    }
-  };
+const handleDragStart = (e) => {
+  setIsDragging(true);
+  e.dataTransfer.setData('application/json', JSON.stringify(fund));
+  e.dataTransfer.effectAllowed = 'copy';
+
+  if (onDragStart) {
+    onDragStart(fund); // Call parent's handler to trigger `setIsVisible(true)`
+  }
+};
+
 
   const handleDragEnd = () => {
     setIsDragging(false);
   };
 
   return (
+    <div
+  draggable
+  onDragStart={handleDragStart} // Use your existing handler here
+>
     <div className={`border-b border-gray-100 transition-all duration-200 ${isDragging ? 'opacity-50 scale-95' : ''}`}>
       <div 
         className={`grid grid-cols-7 gap-4 p-4 cursor-pointer hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
@@ -162,6 +167,7 @@ const FundRow = ({ fund, index, onDragStart }) => {
           )}
         </div>
       </div>
+      
 
       {/* Dynamic Dropdown Content */}
       {isDropdownOpen && (
@@ -316,6 +322,7 @@ const FundRow = ({ fund, index, onDragStart }) => {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };
